@@ -1,6 +1,7 @@
 // Note this object is purely in memory
 const users = {};
 
+// Respond with JSON object.
 const respondJSON = (request, response, status, object) => {
   const headers = {
     'Content-Type': 'application/json',
@@ -11,6 +12,7 @@ const respondJSON = (request, response, status, object) => {
   response.end();
 };
 
+// Response with no body (HEAD requests).
 const respondJSONMeta = (request, response, status) => {
   const headers = {
     'Content-Type': 'application/json',
@@ -21,7 +23,6 @@ const respondJSONMeta = (request, response, status) => {
 };
 
 const getUsers = (request, response) => {
-
   return respondJSON(request, response, 200, users);
 };
 
@@ -45,39 +46,34 @@ const addUser = (request, response, body) => {
       message: 'Name and age are both required.',
     };
   
-    //check to make sure we have both fields
-    //We might want more validation than just checking if they exist
-    //This could easily be abused with invalid types (such as booleans, numbers, etc)
-    //If either are missing, send back an error message as a 400 badRequest
+    // Validate that the necessary fields are part of the body.
+      // Send a 400 (bad request) if not.
     if (!body.name || !body.age) {
       responseJSON.id = 'missingParams';
       return respondJSON(request, response, 400, responseJSON);
     }
   
-    //default status code to 204 updated
+    // Store default 204 (updated) and start process of adding/updating object.
     let responseCode = 204;
   
-    //If the user doesn't exist yet
+    // If there is no user yet.
     if(!users[body.name]) {
-      
-      //Set the status code to 201 (created) and create an empty user
+      // Send a 201 created and beging user creation.
       responseCode = 201;
       users[body.name] = {};
     }
   
-    //add or update fields for this user name
+    // Add/update fields of object.
     users[body.name].name = body.name;
     users[body.name].age = body.age;
   
-    //if response is created, then set our created message
-    //and sent response with a message
+    // Send response if object was created.
     if (responseCode === 201) {
       responseJSON.message = 'Created Successfully';
       return respondJSON(request, response, responseCode, responseJSON);
     }
-    // 204 has an empty payload, just a success
-    // It cannot have a body, so we just send a 204 without a message
-    // 204 will not alter the browser in any way!!!
+    
+    // Send response if object was edited.
     return respondJSONMeta(request, response, responseCode);
   };
 

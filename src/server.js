@@ -1,5 +1,6 @@
 const http = require('http');
 const url = require('url');
+const query = require('querystring');
 const htmlHandler = require('./htmlResponses.js');
 const jsonHandler = require('./jsonResponses.js');
 
@@ -20,7 +21,7 @@ const urlStruct = {
     // POST requests not included in URL struct due to different process
 };
 
-//handle POST requests
+// Handles POST requests.
 const handlePost = (request, response, parsedUrl) => {
   
     // We don't really need to check the pathname since we only have one POST path,
@@ -30,6 +31,7 @@ const handlePost = (request, response, parsedUrl) => {
     }
 };
 
+// Parse the body of the POST requests.
 const parseBody = (request, response, handler) => {
     // array to hold individual pieces as they come in
     const body = [];
@@ -57,7 +59,7 @@ const parseBody = (request, response, handler) => {
     });
   };
 
-
+// Handles any requests coming into the server and directs them to the correct place.
 const onRequest = (request, response) => {
   const parsedUrl = url.parse(request.url);
 

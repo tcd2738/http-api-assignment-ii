@@ -7,7 +7,7 @@
   <script>
     const handleResponse = async (response, parseResponse) => {
       // log the response as per the assignment requirements
-      console.log(resText);
+      console.log(response);
 
       const content = document.querySelector('#content');
       
@@ -16,10 +16,13 @@
           content.innerHTML = `<b>Success</b>`;
           break;
         case 201:
-          content.innerHTML = `<b>created</b>`;
+          content.innerHTML = `<b>Created</b>`;
+          break;
+        case 204:
+          content.innerHTML = `<b>Updated (No Content)</b>`;
           break;
         case 400:
-          content.innerHTML = `<b>bad request</b>`;
+          content.innerHTML = `<b>Bad Request</b>`;
           break;
         case 404:
           content.innerHTML = `<b>Not Found</b>`;
@@ -35,7 +38,10 @@
       }
     };
 
+    // Called when front-end UI makes a GET or HEAD request.
     const requestUpdate = async (userForm) => {
+      
+      //Grab the request info.
       const url = userForm.querySelector('#urlField').value;
       const method = userForm.querySelector('#methodSelect').value;
       
@@ -46,20 +52,56 @@
         }
       });
 
+      // Handled returned response and display on the front end.
       handleResponse(response, method !== 'head');
+    };
+
+    // Called when front-end UI makes a POST request.
+    const sendPost = async (nameForm) => {
+
+      //Grab the request info.
+      const nameAction = nameForm.getAttribute('action');
+      const nameMethod = nameForm.getAttribute('method');
+      
+      // Grab the form info.
+      const nameField = nameForm.querySelector('#nameField');
+      const ageField = nameForm.querySelector('#ageField');
+
+      // Build your data string.
+      const formData = `name=${nameField.value}&age=${ageField.value}`;
+
+      // Make and wait for your fetch response.
+      let response = await fetch(nameAction, {
+        method: nameMethod,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
+        },
+        body: formData,
+      });
+
+      // Handled returned response and display on the front end.
+      handleResponse(response);
     };
 
     const init = () => {
       const userForm = document.querySelector('#userForm');
+      const nameForm = document.querySelector('#nameForm');
       
-      // tells the form to not send the form itself (would redirect)
+      // Tell the forms to do their needed actions without redirecting.
       const getUsers = (e) => {
         e.preventDefault();
         requestUpdate(userForm);
         return false;
       }
+      const addUsers = (e) => {
+        e.preventDefault();
+        sendPost(nameForm);
+        return false;
+      }
       
       userForm.addEventListener('submit', getUsers);
+      nameForm.addEventListener('submit', addUsers);
     };
 
     window.onload = init;
