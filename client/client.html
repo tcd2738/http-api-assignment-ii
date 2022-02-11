@@ -5,7 +5,64 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
+    const handleResponse = async (response, parseResponse) => {
+      // log the response as per the assignment requirements
+      console.log(resText);
 
+      const content = document.querySelector('#content');
+      
+      switch (response.status) {
+        case 200:
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 201:
+          content.innerHTML = `<b>created</b>`;
+          break;
+        case 400:
+          content.innerHTML = `<b>bad request</b>`;
+          break;
+        case 404:
+          content.innerHTML = `<b>Not Found</b>`;
+          break;
+        default:
+          content.innerHTML = `<b>reseponse code not implemented by client</b>`;
+          break;
+      }
+
+      if (parseResponse) {
+        const resText = await response.text();
+        content.innerHTML += `<p>${resText}</p>`;
+      }
+    };
+
+    const requestUpdate = async (userForm) => {
+      const url = userForm.querySelector('#urlField').value;
+      const method = userForm.querySelector('#methodSelect').value;
+      
+      let response = await fetch(url, {
+        method,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      handleResponse(response, method !== 'head');
+    };
+
+    const init = () => {
+      const userForm = document.querySelector('#userForm');
+      
+      // tells the form to not send the form itself (would redirect)
+      const getUsers = (e) => {
+        e.preventDefault();
+        requestUpdate(userForm);
+        return false;
+      }
+      
+      userForm.addEventListener('submit', getUsers);
+    };
+
+    window.onload = init;
   </script>
 </head>
 <body>
