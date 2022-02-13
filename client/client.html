@@ -6,9 +6,6 @@
   
   <script>
     const handleResponse = async (response, parseResponse) => {
-      // log the response as per the assignment requirements
-      console.log(response);
-
       const content = document.querySelector('#content');
       
       switch (response.status) {
@@ -20,7 +17,7 @@
           break;
         case 204:
           content.innerHTML = `<b>Updated (No Content)</b>`;
-          break;
+          return;
         case 400:
           content.innerHTML = `<b>Bad Request</b>`;
           break;
@@ -28,13 +25,23 @@
           content.innerHTML = `<b>Not Found</b>`;
           break;
         default:
-          content.innerHTML = `<b>reseponse code not implemented by client</b>`;
+          content.innerHTML = `<b>Response code not implemented by client.</b>`;
           break;
       }
 
       if (parseResponse) {
-        const resText = await response.text();
-        content.innerHTML += `<p>${resText}</p>`;
+        // Parse the response to JSON.
+        let obj = await response.json();
+        
+        // If we have a message, display it.
+        if(obj.message){
+          content.innerHTML += `<p>${obj.message}</p>`;
+        } else if (obj) {
+          content.innerHTML += `<p>${JSON.stringify(obj)}</p>`;
+        }
+
+        // Print the object per the assignment's requirements.
+        console.log(obj);
       }
     };
 
@@ -60,8 +67,8 @@
     const sendPost = async (nameForm) => {
 
       //Grab the request info.
-      const nameAction = nameForm.getAttribute('action');
-      const nameMethod = nameForm.getAttribute('method');
+      const url = nameForm.getAttribute('action');
+      const method = nameForm.getAttribute('method');
       
       // Grab the form info.
       const nameField = nameForm.querySelector('#nameField');
@@ -71,8 +78,8 @@
       const formData = `name=${nameField.value}&age=${ageField.value}`;
 
       // Make and wait for your fetch response.
-      let response = await fetch(nameAction, {
-        method: nameMethod,
+      let response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json',
@@ -81,7 +88,7 @@
       });
 
       // Handled returned response and display on the front end.
-      handleResponse(response);
+      handleResponse(response, method !== 'head');
     };
 
     const init = () => {
